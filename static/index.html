@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Своё письмо — конструктор признаний</title>
+<style>
+:root{--sky:#b9dcf7;--paper:#fff8f0;--ink:#28121f;--muted:#7d626c;--pink:#ff8eb2;--line:#c7b9bf;--shadow:5px 6px 0 var(--ink)}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 18% 10%,#e4f2ff 0,transparent 30%),linear-gradient(145deg,#a9cff3,#cde7fa);color:var(--ink);font-family:Arial,sans-serif}.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px max(18px,calc((100vw - 1180px)/2));background:#d7ebfbdf;backdrop-filter:blur(10px);border-bottom:1px solid #6d8aa5}.pill,button{border:2px solid var(--ink);border-radius:999px;background:var(--paper);color:var(--ink);font-weight:700;padding:10px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}button:hover{transform:translateY(-1px)}button.active,.primary{background:var(--pink)}.layout{max-width:1180px;margin:22px auto;padding:0 18px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:28px;align-items:start}.forms{display:grid;gap:14px}.card{background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:21px 22px;box-shadow:var(--shadow)}h1,h2{font-family:Georgia,serif;font-weight:500;margin:0 0 12px}h1{font-size:28px;color:#c32e5c}h2{font-size:22px}p{color:var(--muted);line-height:1.55;font-size:14px;margin:0 0 15px}.field{display:grid;gap:7px;margin:13px 0}.field label{font-size:12px;font-weight:700;color:#624653}.field input,.field textarea,.field select{width:100%;border:2px solid var(--line);border-radius:11px;padding:12px 13px;font:15px Arial;color:var(--ink);background:white;outline:none}.field input:focus,.field textarea:focus{border-color:#ed719a}.field textarea{min-height:150px;resize:vertical;line-height:1.5}.row{display:flex;gap:8px;flex-wrap:wrap}.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:15px 0;font-size:14px}.toggle input{accent-color:#ed719a;width:19px;height:19px}.preview-wrap{position:sticky;top:78px}.preview{min-height:590px;background:radial-gradient(ellipse at center,#421a31 0,#1b0d17 56%);border:8px solid var(--paper);outline:2px solid var(--ink);border-radius:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;color:#fff3f6;text-align:center;overflow:hidden}.envelope{width:min(100%,310px);height:190px;position:relative;cursor:pointer;filter:drop-shadow(0 8px 12px #0006);transition:transform .5s}.envbody{position:absolute;inset:0;background:linear-gradient(145deg,#fff9ee,#d7cfc6);border-radius:12px;overflow:hidden}.envbody:before,.envbody:after{content:"";position:absolute;inset:0}.envbody:before{background:#eee6dc;clip-path:polygon(0 0,50% 58%,100% 0)}.envbody:after{background:linear-gradient(30deg,#e2d9d0,#fff8ed);clip-path:polygon(0 100%,50% 48%,100% 100%)}.seal{position:absolute;z-index:2;left:50%;top:51%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#ff9db9,#a3234d 70%);border:3px solid #d65c83;box-shadow:0 3px 6px #4a1028;color:#ffe5ed;font:24px Georgia}.hint{font:italic 18px Georgia;color:#e9c4d5;margin-top:26px}.preview.open .envelope{transform:translateY(-130px) rotateX(15deg);opacity:.12}.preview.open .hint{display:none}.preview-letter{display:none;max-width:100%;white-space:pre-wrap;line-height:1.65;font:italic 18px Georgia}.preview.open .preview-letter{display:block;animation:fade .8s ease}.preview-name{font:italic 15px Georgia;color:#f8aec7;margin-bottom:18px}.preview-foot{display:flex;justify-content:space-between;align-items:center;margin-top:13px;font:italic 13px Georgia;color:#6e5260}.small{font-size:12px;color:var(--muted);line-height:1.5}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.status{font-size:12px;color:#56705c}.photo-preview{width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin-top:10px;display:none}.footer-actions{display:flex;gap:12px;flex-wrap:wrap}.toast{display:none;background:#fff2f7;border:1px solid #e79ab5;padding:12px;border-radius:10px;margin-top:12px;font-size:13px}@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* Romantic effects */
+#emojiAtmosphere{contain:strict;will-change:contents;z-index:0!important;}
+.recipient-view{isolation:isolate;position:relative;}
+.recipient-view>.recipient-inner{position:relative;z-index:1;}
+.recipient-view{position:relative;z-index:3;}
+.effect-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20;contain:strict;isolation:isolate}
+.effect-layer>*{backface-visibility:hidden}
+.float-emoji,.confetti-bit,.heart-burst{will-change:transform,opacity}
+@media(max-width:700px){.float-emoji{filter:none}.sparkle{box-shadow:0 0 5px 1px #ffd4e6}.heart-burst{filter:drop-shadow(0 0 5px #ff78aa)}}
+.sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff7cc;box-shadow:0 0 10px 3px #ffd4e6;animation:twinkle var(--dur,2s) ease-in-out forwards}
+@keyframes twinkle{0%{transform:scale(0) rotate(0);opacity:0}35%{transform:scale(1.6) rotate(90deg);opacity:1}100%{transform:scale(.1) rotate(180deg);opacity:0}}
+.heart-burst{position:absolute;left:50%;top:48%;font-size:clamp(24px,5vw,48px);animation:heartBurst 1.5s cubic-bezier(.16,.75,.25,1) forwards;filter:drop-shadow(0 0 6px #ff78aa)}
+@keyframes heartBurst{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r)) scale(1.25);opacity:0}}
+.recipient-actions button{transition:transform .2s,box-shadow .2s}
+.recipient-actions button:active{transform:scale(.96)}
+.reaction-panel{display:none;width:100%;margin-top:18px;padding:18px;border:1px solid #f4b4cc;border-radius:18px;background:#ffffff0c;backdrop-filter:blur(8px);animation:fade .55s ease}
+.reaction-panel.show{display:block}
+.reaction-title{font:italic 20px Georgia,serif;color:#ffd1e0;margin-bottom:12px}
+.reaction-options{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.reaction-options button{background:#fff3f7;border-color:#ffd2e1;box-shadow:0 4px 0 #6f2945;font-size:13px}
+.recipient-reply{margin:16px auto 4px;max-width:520px;text-align:left}
+.recipient-reply label{display:block;color:#ffe0eb;font:italic 15px Georgia,serif;margin-bottom:8px}
+.recipient-reply textarea{box-sizing:border-box;width:100%;resize:vertical;min-height:82px;padding:12px 14px;border:1px solid #f4b4cc;border-radius:13px;background:#fff8f5;color:#321725;font:15px/1.5 Georgia,serif;outline:none}
+.recipient-reply textarea:focus{border-color:#ff8db6;box-shadow:0 0 0 3px #ff8db633}
+.reply-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.reply-footer span{font-size:11px;color:#f5c5d7}
+.reply-footer button{background:#ff8fb5;color:#351426;border:0;border-radius:999px;padding:10px 15px;font-weight:700;cursor:pointer}
+.reply-footer button:disabled{opacity:.6;cursor:wait}
+.reaction-result{display:none;margin-top:14px;color:#ffe1eb;line-height:1.6;font:italic 17px Georgia,serif}
+.reaction-result.show{display:block;animation:fade .5s ease}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+.float-emoji{position:absolute;bottom:-50px;animation:floatUp var(--dur,5s) linear forwards;filter:drop-shadow(0 2px 4px #ff8eb233);font-size:var(--size,24px)}
+@keyframes floatUp{0%{transform:translate3d(0,0,0) rotate(0deg) scale(.7);opacity:0}10%{opacity:1}85%{opacity:.9}100%{transform:translate3d(var(--drift,35px),-110vh,0) rotate(35deg) scale(1.25);opacity:0}}
+.confetti-bit{position:absolute;top:-20px;width:9px;height:14px;border-radius:3px;animation:confettiFall var(--dur,3.5s) ease-in forwards;transform:rotate(var(--rot,20deg))}
+@keyframes confettiFall{to{transform:translate3d(var(--drift,20px),110vh,0) rotate(720deg);opacity:.1}}
+.recipient-view.open .big-envelope{animation:envelopePop .8s cubic-bezier(.2,.8,.2,1) forwards}
+.recipient-view.open .recipient-letter{animation:letterReveal 1s .15s both}
+@keyframes envelopePop{0%{transform:scale(1) rotate(0)}45%{transform:scale(1.08) rotate(-4deg)}100%{transform:translateY(-18px) scale(.84);opacity:.15}}
+@keyframes letterReveal{from{opacity:0;transform:translateY(25px) scale(.97);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+.seal{animation:sealPulse 2.4s ease-in-out infinite}
+@keyframes sealPulse{0%,100%{box-shadow:0 3px 6px #4a1028,0 0 0 0 #ff8eb200}50%{box-shadow:0 3px 10px #4a1028,0 0 0 10px #ff8eb222}}
+#recipientMessage{white-space:pre-wrap}
+.music-note{position:fixed;right:18px;bottom:18px;z-index:30;border-radius:999px;padding:10px 14px;background:#fff0f7;color:#39172a;border:1px solid #f5a8c7;box-shadow:0 5px 20px #0004}
+@media(max-width:820px){.layout{grid-template-columns:1fr}.preview-wrap{position:static;grid-row:1}.preview{min-height:460px}.top{padding:10px 16px}.card{padding:18px}}
+
+.recipient-view{display:none;min-height:100vh;padding:28px 16px;background:radial-gradient(ellipse at 50% 30%,#51203b,#160b14 68%);color:#fff4f7;text-align:center;align-items:center;justify-content:center;flex-direction:column}.recipient-view.active{display:flex}.recipient-view .recipient-inner{position:relative;z-index:2;width:min(100%,620px);display:flex;flex-direction:column;align-items:center;gap:20px}.recipient-view h1{color:#ffc0d4;font-size:clamp(28px,5vw,44px)}.recipient-view .big-envelope{animation:none;width:min(82vw,380px);height:220px;position:relative;cursor:pointer;filter:drop-shadow(0 14px 20px #0008);transition:transform .7s}.recipient-view .big-envelope .envbody{border-radius:14px}.recipient-view .big-envelope .seal{width:64px;height:64px;font-size:29px}.recipient-view .recipient-letter{display:none;background:#fff8f0;color:#28121f;border:2px solid #f0d9df;border-radius:16px;padding:clamp(22px,5vw,42px);box-shadow:7px 8px 0 #09050a;width:100%;text-align:left;white-space:pre-wrap;line-height:1.8;font:italic 18px Georgia,serif;animation:fade .9s ease}
+/* Cinematic letter sequence: intro -> recipient name -> envelope -> broken seal -> rising paper. */
+.recipient-name-intro{min-height:28px;color:#f5b7cd;font:italic 23px Georgia,serif;letter-spacing:.04em;opacity:0;transform:translateY(10px);text-shadow:0 0 22px #ff8eb255}
+.recipient-view.intro-name .recipient-name-intro{animation:nameAppear .9s .08s ease both}
+.recipient-view.intro-envelope .big-envelope{animation:envelopeAppear 1.15s cubic-bezier(.18,.8,.2,1) both}
+.mail-stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr);width:min(100%,620px);min-height:240px;place-items:center;isolation:isolate}
+.mail-stage>.big-envelope,.mail-stage>.recipient-letter{grid-area:1/1}
+.recipient-view .big-envelope{z-index:2;opacity:0;visibility:hidden;transform:translateY(22px) scale(.94)}
+.recipient-view .big-envelope{overflow:visible}
+.recipient-view .envelope-gloss{position:absolute;inset:0;border-radius:14px;pointer-events:none;z-index:2;mix-blend-mode:screen;transition:background-position .12s ease;}\n.recipient-view:not(.open) .recipient-letter{display:none;}
+.recipient-view.intro-envelope .big-envelope{visibility:visible}
+.recipient-view .big-envelope .envbody{overflow:hidden;position:absolute;inset:0;z-index:1;border-radius:14px}
+.recipient-view .big-envelope .env-flap{position:absolute;z-index:3;left:0;right:0;top:0;height:58%;background:linear-gradient(155deg,#fffdf8,#d9d0c8);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0;backface-visibility:hidden}
+.recipient-view .big-envelope .seal{z-index:5;overflow:visible}
+.recipient-view .big-envelope .seal-mark{display:block;position:relative;z-index:2}
+.recipient-view .big-envelope .seal-crack{position:absolute;z-index:3;inset:7px;background:transparent;clip-path:polygon(48% 0,58% 28%,44% 44%,61% 62%,49% 100%);border-right:2px solid #ffe1e9;opacity:0}
+.recipient-view.open .big-envelope{animation:envelopeSettle .72s ease both,envelopeFade .8s 1.35s ease forwards}
+.recipient-view.open .big-envelope .env-flap{animation:flapOpen .82s .55s cubic-bezier(.2,.8,.2,1) both}
+.recipient-view.open .big-envelope .seal{animation:sealCrack .68s .05s ease-in both}
+.recipient-view.open .big-envelope .seal-mark{animation:sealMarkBreak .62s .08s ease-in both}
+.recipient-view.open .big-envelope .seal-crack{animation:crackFlash .5s .08s ease both}
+.recipient-view.open .recipient-letter{display:block;z-index:4;animation:paperRise 1.5s .95s cubic-bezier(.16,.78,.2,1) both}
+.recipient-view.open #recipientIntro{animation:introFade .55s ease both}
+.recipient-view.open .recipient-name-intro{animation:introFade .45s ease both}
+.recipient-view.open .recipient-hint{display:none}
+.recipient-view.open .mail-stage{min-height:240px}
+.recipient-view .recipient-letter{align-self:start;opacity:0;transform:translateY(145px) scale(.88);filter:blur(4px);will-change:transform,opacity}
+#recipientGreeting,#recipientTitle,#recipientMessage,#recipientPhoto,#recipientSignature,#recipientEnding,#recipientEffect{opacity:0}
+.recipient-view.open #recipientGreeting{animation:contentReveal .65s 2.05s ease both}
+.recipient-view.open #recipientTitle{animation:contentReveal .72s 2.32s ease both}
+.recipient-view.open #recipientMessage{animation:contentReveal 1s 2.58s ease both}
+.recipient-view.open #recipientPhoto{animation:contentReveal .8s 3.1s ease both}
+.recipient-view.open #recipientSignature{animation:contentReveal .7s 3.25s ease both}
+.recipient-view.open #recipientEnding,.recipient-view.open #recipientEffect{animation:contentReveal .8s 3.5s ease both}
+@keyframes nameAppear{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+@keyframes envelopeAppear{0%{opacity:0;transform:translateY(30px) scale(.82);filter:blur(7px) drop-shadow(0 0 0 #ff8eb200)}65%{opacity:1;transform:translateY(-5px) scale(1.025);filter:blur(0) drop-shadow(0 0 35px #ff8eb255)}100%{opacity:1;transform:none;filter:drop-shadow(0 14px 20px #0008)}}
+@keyframes sealCrack{0%{transform:translate(-50%,-50%) scale(1);opacity:1}25%{transform:translate(-50%,-50%) scale(1.12) rotate(-7deg)}55%{transform:translate(-50%,-50%) scale(1.08) rotate(7deg)}100%{transform:translate(-50%,-50%) scale(.15) rotate(22deg);opacity:0}}
+@keyframes sealMarkBreak{0%,25%{transform:scale(1)}55%{transform:scale(1.15) rotate(-12deg)}100%{transform:scale(.2) rotate(35deg);opacity:0}}
+@keyframes crackFlash{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+@keyframes flapOpen{0%{transform:rotateX(0)}100%{transform:rotateX(180deg)}}
+@keyframes envelopeSettle{0%{transform:none;opacity:1}100%{transform:translateY(8px) scale(.98);opacity:.98}}\n@keyframes envelopeFade{to{opacity:0;transform:translateY(35px) scale(.9);filter:blur(2px)}}
+@keyframes paperRise{0%{opacity:0;transform:translateY(145px) scale(.88);filter:blur(4px)}55%{opacity:1;transform:translateY(-12px) scale(.97);filter:blur(0)}78%{transform:translateY(4px) scale(1)}100%{opacity:1;transform:translateY(0) scale(1);filter:none}}
+@keyframes contentReveal{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes introFade{to{opacity:0;transform:translateY(-10px);filter:blur(3px)}}
+@media(prefers-reduced-motion:reduce){.recipient-view.intro-name .recipient-name-intro,.recipient-view.intro-envelope .big-envelope,.recipient-view.open .big-envelope,.recipient-view.open .env-flap,.recipient-view.open .seal,.recipient-view.open .seal-mark,.recipient-view.open .recipient-letter,.recipient-view.open #recipientIntro,.recipient-view.open #recipientGreeting,.recipient-view.open #recipientTitle,.recipient-view.open #recipientMessage,.recipient-view.open #recipientSignature,.recipient-view.open #recipientEnding{animation-duration:.01ms!important;animation-delay:0ms!important;opacity:1!important;transform:none!important;filter:none!important}}
+
+@media(prefers-reduced-motion:reduce){.recipient-view.open .big-envelope,.recipient-view.open .env-flap,.recipient-view.open .seal,.recipient-view.open .recipient-letter,.recipient-view.open #recipientIntro{animation-duration:.01ms!important;animation-delay:0ms!important}}.recipient-view .recipient-letter h2{color:#b42d5c}.recipient-view .recipient-letter .recipient-message{white-space:pre-wrap}.recipient-view .recipient-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.recipient-view button{font-size:14px}.recipient-view .recipient-hint{font:italic 19px Georgia;color:#f4c2d5}.recipient-view .small{color:#d5b8c5}.recipient-view .answer{display:none;margin-top:18px;padding:12px 16px;background:#ff8eb2;border-radius:999px;color:#28121f;font-weight:bold;text-align:center}
+
+/* V14 — cinematic envelope and stationery, optimized around transform/opacity */
+.recipient-view .mail-stage{width:min(100%,560px);min-height:clamp(260px,42vw,330px);margin:8px auto 0}
+.recipient-view .big-envelope{width:min(82vw,380px);height:auto;aspect-ratio:288/196;position:relative;overflow:visible;border-radius:12px;cursor:pointer;opacity:0;visibility:hidden;transform:translate3d(0,24px,0) scale(.92);filter:drop-shadow(0 18px 25px #0007);transition:none;will-change:transform,opacity}
+.recipient-view.intro-envelope .big-envelope{visibility:visible;animation:envArrive 1.25s cubic-bezier(.2,.85,.25,1) both}
+.recipient-view .big-envelope .envbody{position:absolute;inset:0;border-radius:12px;background:linear-gradient(145deg,#fffaf3,#d9cec2);z-index:0}
+.recipient-view .envelope-folds{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.recipient-view .envelope-gloss{z-index:3;pointer-events:none;border-radius:12px;background:radial-gradient(120px 92px at var(--gloss-x,50%) var(--gloss-y,38%),rgba(255,255,255,.28),rgba(255,255,255,.06) 46%,transparent 72%)}
+.recipient-view .big-envelope .env-flap{position:absolute;z-index:4;left:0;right:0;top:0;height:59%;border-radius:12px 12px 0 0;background:linear-gradient(155deg,#fffdf8 0%,#e6ddd4 70%,#d6c9bd 100%);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0;backface-visibility:hidden;filter:drop-shadow(0 2px 2px #0002)}
+.recipient-view .big-envelope .seal{position:absolute;z-index:6;left:50%;top:51%;width:66px;height:66px;border-radius:48% 52% 51% 49%/53% 47% 53% 47%;display:grid;place-items:center;transform:translate(-50%,-50%);background:radial-gradient(circle at 36% 30%,#ffb4c9,#b62c59 58%,#741b3b 100%);border:1px solid #e77b9e;box-shadow:0 5px 12px #35101f88,inset 0 3px 5px #fff5,inset 0 -5px 8px #4b102a66;color:#ffeaf0;font:28px Georgia;animation:sealBreath 2.5s ease-in-out infinite}
+.recipient-view .seal-mark{position:relative;z-index:2;text-shadow:0 1px 1px #781d3b}
+.recipient-view .seal-crack{position:absolute;inset:6px;z-index:4;opacity:0;background:linear-gradient(105deg,transparent 42%,#ffe8ef 44%,#7c173b 48%,transparent 52%);clip-path:polygon(49% 0,58% 26%,43% 45%,61% 63%,48% 100%)}
+.recipient-view .seal-chip{position:absolute;z-index:7;width:17px;height:13px;background:linear-gradient(135deg,#e45b83,#8e1c43);opacity:0;top:45%}
+.recipient-view .seal-chip-a{left:12%;clip-path:polygon(0 0,100% 30%,70% 100%,15% 80%)}
+.recipient-view .seal-chip-b{right:10%;clip-path:polygon(0 25%,100% 0,85% 100%,30% 75%)}
+.recipient-view.open .big-envelope{animation:envHold .55s ease both}
+.recipient-view.open .big-envelope .seal{animation:sealCrackOpen .64s .04s cubic-bezier(.2,.7,.2,1) both}
+.recipient-view.open .seal-mark{animation:sealMarkSnap .55s .06s ease-in both}
+.recipient-view.open .seal-crack{animation:crackDraw .42s .08s ease both}
+.recipient-view.open .seal-chip-a{animation:sealChipA .7s .15s ease-out both}
+.recipient-view.open .seal-chip-b{animation:sealChipB .7s .15s ease-out both}
+.recipient-view.open .big-envelope .env-flap{animation:realFlapOpen .9s .58s cubic-bezier(.2,.8,.2,1) both}
+.recipient-view.open .recipient-letter{display:block;z-index:5;animation:paperSlide 1.1s 1.48s cubic-bezier(.18,.85,.22,1) both}
+.recipient-view.open .big-envelope{animation:envHold .55s ease both,envFadeBack .65s 2.15s ease forwards}
+.recipient-view .recipient-letter{box-sizing:border-box;width:min(100%,500px);min-height:300px;align-self:start;position:relative;margin:0;padding:28px 25px 30px;border:1px solid #e6d8c9;border-radius:16px;background-image:linear-gradient(transparent 48.8%,rgba(0,0,0,.045) 49.6%,rgba(255,255,255,.38) 50.4%,transparent 51.2%),radial-gradient(130% 100% at 50% 0%,rgba(255,255,255,.7),transparent 48%),linear-gradient(160deg,rgba(0,0,0,.035),transparent 32%,transparent 70%,rgba(60,40,20,.06));background-color:#fdf6ed;color:#382532;text-align:left;box-shadow:0 22px 48px -14px #0009;opacity:0;transform:translate3d(0,110px,0) scale(.88) rotate(-.6deg);filter:blur(3px);will-change:transform,opacity;overflow:hidden}
+.recipient-view .recipient-letter:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");background-size:128px 128px}
+.recipient-view .recipient-letter>*{position:relative;z-index:1}
+#recipientGreeting{font:italic 24px/1.25 Georgia,serif;color:#a83b60;margin-bottom:13px}
+#recipientTitle{font:500 clamp(29px,6vw,42px)/1.08 Georgia,serif;color:#382532;margin:0 0 18px}
+#recipientMessage{font:20px/1.42 Georgia,serif;white-space:pre-wrap;color:#493541}
+#recipientSignature{font:italic 25px Georgia,serif;color:#987b85;text-align:right}
+#recipientEnding{font:500 23px Georgia,serif;color:#9c3d60}
+#recipientPhoto{position:relative;z-index:2}
+.recipient-view.open #recipientGreeting{animation:inkIn .65s 2.48s ease both}
+.recipient-view.open #recipientTitle{animation:inkIn .72s 2.72s ease both}
+.recipient-view.open #recipientMessage .ink-line{animation:inkLine .72s var(--line-delay,.1s) ease both}
+.recipient-view.open #recipientPhoto{animation:inkIn .8s 3.4s ease both}
+.recipient-view.open #recipientSignature{animation:inkIn .7s 3.65s ease both}
+.recipient-view.open #recipientEnding{animation:inkIn .7s 3.9s ease both}
+.recipient-view .recipient-hint{margin-top:22px;font:italic 16px Georgia,serif;color:#edc9d8}
+.recipient-view.intro-name #recipientNameIntro{animation:nameReveal .9s .08s ease both}
+.recipient-view.intro-envelope #recipientIntro{animation:introOut .55s ease both}
+.recipient-view.open .recipient-hint{opacity:0;transition:opacity .2s}
+@keyframes nameReveal{from{opacity:0;transform:translateY(12px);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+@keyframes envArrive{0%{opacity:0;transform:translate3d(0,30px,0) scale(.82) rotate(-2deg);filter:blur(6px) drop-shadow(0 0 0 #ff8eb200)}65%{opacity:1;transform:translate3d(0,-5px,0) scale(1.025) rotate(.4deg);filter:blur(0) drop-shadow(0 0 30px #ff8eb244)}100%{opacity:1;transform:none;filter:drop-shadow(0 18px 25px #0007)}}
+@keyframes sealBreath{0%,100%{box-shadow:0 5px 12px #35101f88,inset 0 3px 5px #fff5,inset 0 -5px 8px #4b102a66}50%{box-shadow:0 5px 15px #35101f99,0 0 0 8px #ff9fbd20,inset 0 3px 5px #fff6,inset 0 -5px 8px #4b102a66}}
+@keyframes sealCrackOpen{0%{transform:translate(-50%,-50%) scale(1) rotate(0)}22%{transform:translate(-50%,-50%) scale(1.12) rotate(-5deg)}38%{transform:translate(-50%,-50%) scale(1.08) rotate(5deg)}100%{transform:translate(-50%,-50%) scale(.18) rotate(28deg);opacity:0}}
+@keyframes sealMarkSnap{0%,25%{transform:scale(1)}55%{transform:scale(1.25) rotate(-18deg)}100%{transform:scale(.1) rotate(42deg);opacity:0}}
+@keyframes crackDraw{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+@keyframes sealChipA{0%{opacity:0;transform:translate(0,0) rotate(0)}25%{opacity:1}100%{opacity:0;transform:translate(-42px,-30px) rotate(-95deg)}}
+@keyframes sealChipB{0%{opacity:0;transform:translate(0,0) rotate(0)}25%{opacity:1}100%{opacity:0;transform:translate(42px,-24px) rotate(110deg)}}
+@keyframes realFlapOpen{0%{transform:rotateX(0);filter:brightness(1)}45%{filter:brightness(1.15)}100%{transform:rotateX(180deg);filter:brightness(.9)}}
+@keyframes envHold{to{transform:translateY(4px) scale(.99)}}
+@keyframes envFadeBack{to{opacity:0;transform:translateY(38px) scale(.9);filter:blur(2px)}}
+@keyframes paperSlide{0%{opacity:0;transform:translate3d(0,115px,0) scale(.86) rotate(-.8deg);filter:blur(4px)}62%{opacity:1;transform:translate3d(0,-9px,0) scale(.98) rotate(.2deg);filter:blur(0)}82%{transform:translate3d(0,3px,0) scale(1) rotate(-.25deg)}100%{opacity:1;transform:none;filter:none}}
+@keyframes inkIn{from{opacity:0;transform:translateY(10px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes inkLine{from{opacity:0;transform:translateY(7px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes introOut{to{opacity:0;transform:translateY(-9px);filter:blur(3px)}}
+@media(max-width:600px){.recipient-view{padding:22px 13px}.recipient-view .mail-stage{min-height:255px}.recipient-view .recipient-letter{padding:24px 19px;min-height:260px}#recipientMessage{font-size:18px;line-height:1.38}.recipient-view .big-envelope{width:min(86vw,360px)}}
+@media(prefers-reduced-motion:reduce){.recipient-view.intro-name #recipientNameIntro,.recipient-view.intro-envelope .big-envelope,.recipient-view.open .big-envelope,.recipient-view.open .env-flap,.recipient-view.open .seal,.recipient-view.open .seal-mark,.recipient-view.open .recipient-letter,.recipient-view.open #recipientGreeting,.recipient-view.open #recipientTitle,.recipient-view.open #recipientMessage .ink-line,.recipient-view.open #recipientSignature,.recipient-view.open #recipientEnding{animation-duration:.01ms!important;animation-delay:0ms!important;opacity:1!important;transform:none!important;filter:none!important}}
+/* Final polish: make each revealed line animate independently and keep the sheet emerging from the envelope. */
+.recipient-view .recipient-message .ink-line{display:block;min-height:1.42em;opacity:0;will-change:transform,opacity,filter}
+.recipient-view .recipient-message .ink-line:last-child{margin-bottom:0}
+.recipient-view .big-envelope{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.recipient-view .recipient-letter{grid-area:1/1;align-self:start;justify-self:center;width:min(100%,500px);max-width:500px}
+.recipient-view.open .recipient-letter{display:block}
+.recipient-view.open .recipient-message .ink-line{animation:inkLine .72s var(--line-delay,.1s) ease both}
+@media(max-width:600px){.recipient-view .mail-stage{min-height:255px}.recipient-view .recipient-letter{width:100%;padding:24px 19px}}
+
+
+
+.recipient-view #recipientIntro{opacity:0;animation:introText .9s .18s ease both}
+@keyframes introText{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+</style></head><body>
+<header class="top"><strong>✉ Своё письмо</strong><div class="bar"><span class="status" id="saveStatus">● Черновик в браузере</span><button onclick="resetForm()">Сбросить</button></div></header>
+<main class="layout"><section class="forms">
+<div class="card"><h1>Создай личное признание</h1><p>Настрой письмо, конверт и финал. Изменения сразу отображаются в живом предпросмотре. Создай письмо и отправь получателю ссылку. В демо-режиме текстовые настройки передаются прямо в ссылке; для фото и музыки понадобится сервер.</p><h2>Повод</h2><div class="row" id="occasions">
+<button class="active" data-occasion="Любимые слова">✨ Свой повод</button>
+<button data-occasion="Спасибо тебе">🤍 Спасибо</button>
+<button data-occasion="Прости меня">🥀 Извинение</button>
+<button data-occasion="С днём рождения">🎂 День рождения</button>
+<button data-occasion="Давай увидимся?">✉️ Приглашение</button>
+<button data-occasion="Скучаю по тебе">🌙 Скучаю</button>
+<button data-occasion="Признание в чувствах">❤️ Признание</button>
+<button data-occasion="Я рядом">🫶 Поддержка</button>
+</div></div>
+<div class="card"><h2>Кому</h2><p>Имя появится на конверте и в самом письме.</p><div class="field"><label for="recipient">Имя получателя</label><input id="recipient" value="Елдана" placeholder="Например, Елдана"></div><div class="field"><label for="sender">От кого</label><input id="sender" value="Твой тайный поклонник" placeholder="Твоё имя или подпись"></div></div>
+<div class="card"><h2>Первый экран</h2><div class="field"><label for="intro">Строка на первом экране</label><input id="intro" value="это для тебя"></div><div class="field"><label for="envelopeHint">Подпись под конвертом</label><input id="envelopeHint" value="нажми на конверт"></div><div class="field"><label for="greeting">Обращение на листе</label><input id="greeting" value="Это тебе, {name}"><span class="small">{name} автоматически заменится именем получателя.</span></div></div>
+<div class="card"><h2>Письмо</h2><div class="field"><label for="title">Заголовок</label><input id="title" value="Мне давно хотелось сказать"></div><div class="field"><label for="message">Текст признания</label><textarea id="message">Елдана, я не знаю, как правильно начать, поэтому просто скажу честно: ты мне очень нравишься. В тебе есть что-то особенное, из-за чего я невольно улыбаюсь, когда думаю о тебе. Я не хочу торопить события или давить на тебя. Просто хочу, чтобы ты знала о моих чувствах. ❤️</textarea></div><div class="field"><label for="signature">Подпись в конце</label><input id="signature" value="С теплом ❤️"></div><div class="field"><label>Почерк</label><div class="row" id="fonts"><button class="active" data-font="italic">Рукописный</button><button data-font="Georgia">Антиква</button><button data-font="Arial">Простой</button></div></div><div class="field"><label>Язык интерфейса</label><div class="row" id="languages"><button class="active">Русский</button><button>O‘zbekcha</button><button>English</button></div></div></div>
+<div class="card"><h2>Фотографии</h2><p>Добавь снимок с подписью — он появится в письме и сохранится вместе с ним.</p><div class="field"><label for="photos">Выбрать фото</label><input id="photos" type="file" accept="image/*" multiple><img id="photoPreview" class="photo-preview" alt="Предпросмотр фотографии"></div><div class="field"><label for="photoCaption">Подпись к фото</label><input id="photoCaption" placeholder="Например: мой любимый момент"></div></div>
+<div class="card"><h2>Кнопки и праздник</h2><div class="field"><label for="yesText">Надпись кнопки согласия</label><input id="yesText" value="И тебе спасибо ♡" placeholder="Автоматически зависит от повода"></div><div class="toggle"><span>Показывать кнопку «не смогу»</span><input id="noButton" type="checkbox"></div><div class="field"><label>Эффект в финале</label><div class="row" id="effects"><button class="active" data-effect="❤️">Сердца</button><button data-effect="🎉">Конфетти</button><button data-effect="😊">Рожицы</button><button data-effect="">Без анимации</button></div></div></div>
+<div class="card"><h2>Тема и финал</h2><div class="field"><label>Цветовая тема</label><div class="row" id="themes"><button class="active" data-theme="rose">Ночная роза</button><button data-theme="ocean">Полночный океан</button><button data-theme="gold">Золотой час</button><button data-theme="night">Звёздная ночь</button></div></div><div class="field"><label for="ending">Финальная фраза</label><input id="ending" value="Я просто хотел, чтобы ты знала ❤️"></div><div class="toggle"><span>Показывать кнопку «Поделиться»</span><input id="shareButton" type="checkbox" checked></div></div>
+<div class="card"><h2>Дополнительные настройки</h2><div class="toggle"><span>Запросить дату</span><input id="askDate" type="checkbox"></div><div class="toggle"><span>Запросить время</span><input id="askTime" type="checkbox"></div><div class="toggle"><span>Разрешить повторное открытие</span><input id="reopen" type="checkbox" checked></div><div class="field"><label for="password">Кодовое слово (необязательно)</label><input id="password" placeholder="Только для получателя"></div><div class="field"><label for="music">🎵 Фоновая музыка</label><input id="music" type="file" accept="audio/*"><span class="small">Загрузи свой трек до 5 МБ. Музыка начнёт играть после нажатия на конверт — так требуют браузеры. Если трек не загружать, можно включить встроенную нежную мелодию.</span><div class="row"><button type="button" id="testMusic">▶ Проверить музыку</button><button type="button" id="ambientMusic">♫ Встроенная мелодия: выкл.</button></div><audio id="editorAudio" controls style="display:none;width:100%;margin-top:8px"></audio></div></div>
+<div class="card"><h2>Публикация</h2><p>Публикация сохраняет письмо, выбранное фото и музыку вместе с настройками. Для стабильной работы загружай аудио до 5 МБ и фото до 3 МБ.</p><div class="footer-actions"><button class="primary" onclick="publishDemo()">Опубликовать и получить ссылку</button><button onclick="downloadConfig()">Скачать настройки JSON</button></div><div class="toast" id="toast"></div></div>
+</section>
+<aside class="preview-wrap"><div class="preview" id="preview"><div class="preview-name" id="previewIntro">это для тебя</div><div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Открыть конверт"><div class="envbody"></div><div class="seal">♥</div></div><div class="hint" id="previewHint">нажми на конверт</div><div class="preview-letter"><div id="previewGreeting">Это тебе, Елдана</div><h2 id="previewTitle">Мне давно хотелось сказать</h2><div id="previewMessage"></div><img id="previewPhoto" class="photo-preview" alt="Фото в письме"><p id="previewCaption"></p><p id="previewSignature">С теплом ❤️</p><h2 id="previewEnding"></h2><div id="previewEffect">❤️ ❤️ ❤️</div></div></div><div class="preview-foot"><span>живое превью ♡</span><button onclick="togglePreview()">Открыть / закрыть</button></div><p class="small">Нажми на конверт, чтобы увидеть состояние открытого письма. Это демонстрация интерфейса, а не опубликованная страница.</p></aside></main>
+<section class="recipient-view" id="recipientView"><div class="recipient-inner"><div class="small" id="recipientTop">Личное письмо ♡</div><h1 id="recipientIntro">Это для тебя</h1><div class="recipient-name-intro" id="recipientNameIntro"></div><div class="mail-stage" id="mailStage"><div class="big-envelope" id="bigEnvelope" role="button" tabindex="0" aria-label="Открыть письмо"><div class="envbody"></div>
+<svg class="envelope-folds" viewBox="0 0 288 196" aria-hidden="true" preserveAspectRatio="none">
+ <defs><linearGradient id="env-pocket" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8dfd5"/><stop offset="1" stop-color="#c9bdb2"/></linearGradient></defs>
+ <clipPath id="env-clip"><rect x="0" y="0" width="288" height="196" rx="12"/></clipPath>
+ <g clip-path="url(#env-clip)">
+  <path d="M0 0 L144 101.92 L0 196 Z" fill="#e8dfd5"/>
+  <path d="M288 0 L144 101.92 L288 196 Z" fill="#f0e8df"/>
+  <path d="M0 196 L144 86.24 L288 196 Z" fill="url(#env-pocket)"/>
+  <path d="M0 196 L144 86.24 L288 196" fill="none" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
+ </g>
+ <rect x=".5" y=".5" width="287" height="195" rx="12" fill="none" stroke="rgba(0,0,0,0.14)"/>
+</svg>
+<div aria-hidden="true" class="envelope-gloss pointer-events-none absolute inset-0 rounded-xl"></div>
+<div class="env-flap"></div>
+<div class="seal"><span class="seal-mark">♥</span><span class="seal-crack"></span><span class="seal-chip seal-chip-a"></span><span class="seal-chip seal-chip-b"></span></div></div><article class="recipient-letter" id="recipientLetter"><div id="recipientGreeting">Это тебе</div><h2 id="recipientTitle"></h2><div class="recipient-message" id="recipientMessage"></div><img id="recipientPhoto" alt="Фото в письме" style="display:none;max-width:min(100%,420px);max-height:320px;object-fit:contain;border-radius:18px;box-shadow:0 12px 36px #0006;margin:18px auto"><div id="recipientSignature" style="margin-top:24px"></div><h2 id="recipientEnding" style="margin-top:28px"></h2><div id="recipientEffect" style="text-align:center;font-size:28px;margin-top:18px"></div><div class="answer" id="recipientAnswer"></div></article></div><div class="recipient-hint" id="recipientHint">нажми на конверт</div><audio id="recipientAudio" loop preload="none"></audio><div class="recipient-actions"><button id="musicToggle" style="display:none">♫ Включить музыку</button><button id="answerButton" class="primary" style="display:none">Ответить ♡</button><button id="shareRecipient" style="display:none">Поделиться</button><button id="restartRecipient" style="display:none">Открыть ещё раз</button></div><section class="reaction-panel" id="reactionPanel"><div class="reaction-title" id="reactionTitle">А что ты сейчас чувствуешь? ♡</div><div class="reaction-options"><button data-reaction="smile">Мне приятно 💗</button><button data-reaction="talk">Давай поговорим ☕</button><button data-reaction="time">Мне нужно время 🌷</button></div><div class="recipient-reply"><label for="recipientReply">Или напиши мне что-нибудь своими словами 💌</label><textarea id="recipientReply" maxlength="500" rows="3" placeholder="Можешь написать всё, что захочешь…"></textarea><div class="reply-footer"><span id="replyCounter">0 / 500</span><button type="button" id="sendRecipientReply">Отправить сообщение 💗</button></div></div><div class="reaction-result" id="reactionResult" aria-live="polite"></div><p class="small">Твой ответ будет сохранён приватно и появится у автора письма.</p></section><p class="small" id="recipientFooter">Создано с теплом ♡</p></div></section>
+<script>
+const $=id=>document.getElementById(id);
+let currentFont='italic',currentEffect='❤️',currentTheme='rose',selectedOccasion='Любимые слова';
+let photoData='',musicData='',ambientEnabled=false,ambientCtx=null,ambientNodes=[],ambientTimer=null,recipientMusicOn=false;
+const occasionActions={
+'Любимые слова':{button:'И тебе спасибо ♡',prompt:'А что ты сейчас чувствуешь? ♡',reply:'Я очень надеюсь, что это письмо подарило тебе улыбку. Спасибо, что прочитала его 💗'},
+'Спасибо тебе':{button:'И тебе спасибо 🤍',prompt:'Что ты хочешь ответить? ♡',reply:'Мне очень приятно. Спасибо за такие тёплые слова 🤍'},
+'Прости меня':{button:'Я тебя прощаю 🌷',prompt:'Что ты чувствуешь сейчас? ♡',reply:'Спасибо, что нашёл(ла) в себе силы сказать это. Мне нужно немного времени 🌷'},
+'С днём рождения':{button:'Спасибо за поздравление 🎂',prompt:'Как тебе поздравление? ♡',reply:'Спасибо большое за поздравление! Мне очень приятно 🎂'},
+'Давай увидимся?':{button:'Давай! 💌',prompt:'Как насчёт встречи? ♡',reply:'Давай попробуем выбрать день и увидеться 💌'},
+'Скучаю по тебе':{button:'Я тоже скучаю 💗',prompt:'Ты тоже скучаешь? ♡',reply:'Я тоже скучаю. Было бы здорово скоро увидеться 💗'},
+'Признание в чувствах':{button:'Я прочитала ❤️',prompt:'Что ты чувствуешь после этих слов? ♡',reply:'Спасибо, что поделился своими чувствами. Мне важно это ❤️'},
+'Я рядом':{button:'Спасибо, что рядом 🫶',prompt:'Хочешь что-нибудь рассказать? ♡',reply:'Спасибо, что поддерживаешь меня. Это действительно важно 🫶'}
+};
+function applyOccasion(occasion){
+ const item=occasionActions[occasion]||occasionActions['Любимые слова'];
+ if($('yesText'))$('yesText').value=item.button;
+ if($('reactionTitle'))$('reactionTitle').textContent=item.prompt;
+}
+function val(id){return $(id).value}function render(){const name=val('recipient')||'тебе';$('previewIntro').textContent=val('intro');$('previewHint').textContent=val('envelopeHint');$('previewGreeting').textContent=val('greeting').replaceAll('{name}',name);$('previewTitle').textContent=val('title');$('previewMessage').textContent=val('message');$('previewCaption').textContent=val('photoCaption')||'';$('previewSignature').textContent=(val('signature')+' · '+(val('sender')||'')).trim();$('previewEnding').textContent=val('ending');$('previewEffect').textContent=currentEffect?Array(3).fill(currentEffect).join(' '):'';document.querySelector('.preview-letter').style.fontFamily=currentFont==='italic'?'Georgia,serif':currentFont;document.querySelector('.preview-letter').style.fontStyle=currentFont==='italic'?'italic':'normal';$('saveStatus').textContent='● Изменения в редакторе';try{localStorage.setItem('letterDraft',JSON.stringify(getConfig()))}catch(e){}}
+function getConfig(){let o={};document.querySelectorAll('input,textarea,select').forEach(e=>{if(e.type==='file'||!e.id)return;o[e.id]=e.type==='checkbox'?e.checked:e.value});return {...o,occasion:selectedOccasion,font:currentFont,effect:currentEffect,theme:currentTheme,photoData,musicData,ambientEnabled}}
+function togglePreview(){$('preview').classList.toggle('open');if($('preview').classList.contains('open'))burstEffects(currentEffect)};$('envelope').addEventListener('click',togglePreview);$('envelope').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePreview()}});
+document.querySelectorAll('input:not([type=file]),textarea,select').forEach(e=>e.addEventListener('input',render));
+function setChoice(group,attr,callback){$(group).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ $(group).querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');callback(b)}))}
+setChoice('occasions','data-occasion',b=>{selectedOccasion=b.dataset.occasion;if(!val('title'))$('title').value=selectedOccasion;applyOccasion(selectedOccasion);render()});setChoice('fonts','data-font',b=>{currentFont=b.dataset.font;render()});setChoice('effects','data-effect',b=>{currentEffect=b.dataset.effect;render()});setChoice('themes','data-theme',b=>{currentTheme=b.dataset.theme;const colors={rose:['#b9dcf7','#28121f'],ocean:['#b9dcf7','#10243b'],gold:['#f1d5a3','#40231e'],night:['#c5c9ee','#151b3b']};document.documentElement.style.setProperty('--sky',colors[currentTheme][0]);document.documentElement.style.setProperty('--ink',colors[currentTheme][1]);render()});setChoice('languages','',b=>{showToast('Переключение языка будет подключено в следующем этапе.')});
+$('photos').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(f.size>3*1024*1024){showToast('Фото слишком большое. Выбери изображение до 3 МБ.');e.target.value='';return}const r=new FileReader();r.onload=()=>{photoData=r.result;$('photoPreview').src=r.result;$('photoPreview').style.display='block';$('previewPhoto').src=r.result;$('previewPhoto').style.display='block';render()};r.readAsDataURL(f)});
+$('music').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(f.size>5*1024*1024){showToast('Аудио слишком большое. Выбери трек до 5 МБ.');e.target.value='';return}const r=new FileReader();r.onload=()=>{musicData=r.result;$('editorAudio').src=r.result;$('editorAudio').style.display='block';$('editorAudio').load();showToast('Трек готов! Он сохранится вместе с письмом.');render()};r.readAsDataURL(f)});
+$('testMusic').addEventListener('click',async()=>{if(musicData){$('editorAudio').style.display='block';try{await $('editorAudio').play()}catch(e){showToast('Нажми ▶ в аудиоплеере, чтобы разрешить звук.')}}else if(ambientEnabled){startAmbient();}else showToast('Сначала загрузи трек или включи встроенную мелодию.')});
+$('ambientMusic').addEventListener('click',()=>{ambientEnabled=!ambientEnabled;$('ambientMusic').textContent='♫ Встроенная мелодия: '+(ambientEnabled?'вкл.':'выкл.');if(ambientEnabled)startAmbient();else stopAmbient();render()});
+function startAmbient(){try{if(!ambientCtx)ambientCtx=new(window.AudioContext||window.webkitAudioContext)();ambientCtx.resume();stopAmbient();const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23,440,587.33,440,349.23];let step=0;const playNote=()=>{const osc=ambientCtx.createOscillator(),gain=ambientCtx.createGain();osc.type='sine';osc.frequency.value=notes[step++%notes.length];gain.gain.setValueAtTime(.0001,ambientCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.055,ambientCtx.currentTime+.08);gain.gain.exponentialRampToValueAtTime(.0001,ambientCtx.currentTime+.72);osc.connect(gain);gain.connect(ambientCtx.destination);osc.start();osc.stop(ambientCtx.currentTime+.75);ambientNodes.push({osc,gain})};playNote();ambientTimer=setInterval(playNote,420);showToast('Нежная встроенная мелодия включена ♫')}catch(e){showToast('Встроенная мелодия не поддерживается этим браузером.')}} 
+function stopAmbient(){if(ambientTimer){clearInterval(ambientTimer);ambientTimer=null}ambientNodes.forEach(n=>{try{n.osc.stop()}catch(e){}});ambientNodes=[]}
+function playLetterMusic(cfg){const audio=$('recipientAudio');$('musicToggle').style.display='none';if(cfg.musicData){audio.src=cfg.musicData;audio.style.display='none';$('musicToggle').textContent='♫ Включить музыку';$('musicToggle').onclick=async()=>{try{if(audio.paused){await audio.play();$('musicToggle').textContent='♫ Выключить музыку'}else{audio.pause();$('musicToggle').textContent='♫ Включить музыку'}}catch(e){$('musicToggle').textContent='Нажми ещё раз для музыки'}}}else if(cfg.ambientEnabled){$('musicToggle').textContent='♫ Включить мелодию';$('musicToggle').onclick=()=>{if(recipientMusicOn){stopAmbient();recipientMusicOn=false;$('musicToggle').textContent='♫ Включить мелодию'}else{startAmbient();recipientMusicOn=true;$('musicToggle').textContent='♫ Выключить мелодию'}}}else{$('musicToggle').style.display='none'}} 
+// One canvas draws hundreds of lightweight emoji particles instead of
+// creating hundreds of animated DOM nodes.
+let atmosphereCanvas=null, atmosphereCtx=null, atmosphereFrame=0;
+let atmosphereParticles=[], atmosphereRunning=false, atmosphereLast=0;
+const atmosphereEmojis=['💗','💖','💕','💘','🌸','✨','🫶','🤍','💞','🌷','💝','⭐'];
+const emojiSpriteCache=new Map();
+let lastAtmosphereDraw=0;
+function ensureAtmosphereCanvas(){
+  if(atmosphereCanvas&&atmosphereCanvas.isConnected)return;
+  atmosphereCanvas=document.createElement('canvas');
+  atmosphereCanvas.id='emojiAtmosphere';
+  atmosphereCanvas.setAttribute('aria-hidden','true');
+  atmosphereCanvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:block;';
+  const root=document.getElementById('recipientView');
+  (root||document.body).insertBefore(atmosphereCanvas,(root||document.body).firstChild);
+  atmosphereCtx=atmosphereCanvas.getContext('2d',{alpha:true,desynchronized:true});
+  if(!atmosphereCtx){atmosphereCanvas.remove();atmosphereCanvas=null;return;}
+  resizeAtmosphereCanvas();
+  window.addEventListener('resize',resizeAtmosphereCanvas,{passive:true});
+}
+function resizeAtmosphereCanvas(){
+  if(!atmosphereCanvas||!atmosphereCtx)return;
+  // A capped backing resolution keeps Retina MacBooks from rendering 4x pixels.
+  const dpr=Math.min(window.devicePixelRatio||1,1.15);
+  const root=document.getElementById('recipientView');
+  const bounds=(root&&root.classList.contains('active'))?root.getBoundingClientRect():{width:innerWidth,height:innerHeight};
+  const width=Math.max(bounds.width,innerWidth),height=Math.max(bounds.height,innerHeight);
+  atmosphereCanvas.width=Math.round(width*dpr);
+  atmosphereCanvas.height=Math.round(height*dpr);
+  atmosphereCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function getEmojiSprite(emoji,size){
+  const bucket=Math.max(18,Math.round(size/6)*6);
+  const key=emoji+'|'+bucket;
+  if(emojiSpriteCache.has(key))return emojiSpriteCache.get(key);
+  const canvas=document.createElement('canvas');
+  const px=Math.ceil(bucket*1.8);
+  canvas.width=px*2;canvas.height=px*2;
+  const c=canvas.getContext('2d');
+  c.font=`${px}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;
+  c.textAlign='center';c.textBaseline='middle';
+  c.fillText(emoji,canvas.width/2,canvas.height/2);
+  emojiSpriteCache.set(key,canvas);
+  if(emojiSpriteCache.size>100)emojiSpriteCache.delete(emojiSpriteCache.keys().next().value);
+  return canvas;
+}
+function addAtmosphereParticle(options={}){
+  const w=innerWidth,h=innerHeight,ambient=!!options.ambient;
+  const size=options.size||(ambient?15+Math.random()*20:20+Math.random()*30);
+  atmosphereParticles.push({
+    x:options.x??Math.random()*w,y:options.y??(ambient?Math.random()*h:h+Math.random()*100),
+    vx:options.vx??((Math.random()-.5)*(ambient?9:34)),
+    vy:options.vy??-(ambient?7+Math.random()*17:50+Math.random()*100),
+    size,rot:Math.random()*Math.PI*2,vr:(Math.random()-.5)*(ambient?.12:.8),
+    emoji:options.emoji||atmosphereEmojis[Math.floor(Math.random()*atmosphereEmojis.length)],
+    life:ambient?999:2.8+Math.random()*2.5,ambient
+  });
+}
+function startAtmosphereLoop(){
+  if(atmosphereRunning||document.hidden)return;
+  ensureAtmosphereCanvas();
+  if(!atmosphereCtx)return;
+  atmosphereRunning=true;atmosphereLast=0;lastAtmosphereDraw=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const target=innerWidth<700?(reduced?12:92):(reduced?22:148);
+  let current=atmosphereParticles.filter(p=>p.ambient).length;
+  while(current<target){addAtmosphereParticle({ambient:true});current++;}
+  atmosphereFrame=requestAnimationFrame(drawAtmosphere);
+}
+function drawAtmosphere(now){
+  if(!atmosphereRunning||!atmosphereCtx)return;
+  // Cap drawing at ~30 FPS; animation still moves smoothly with elapsed-time motion.
+  if(now-lastAtmosphereDraw<33){atmosphereFrame=requestAnimationFrame(drawAtmosphere);return;}
+  lastAtmosphereDraw=now;
+  const dt=Math.min((now-(atmosphereLast||now))/1000,.06);atmosphereLast=now;
+  const ctx=atmosphereCtx,w=innerWidth,h=innerHeight;
+  ctx.clearRect(0,0,w,h);
+  for(let i=atmosphereParticles.length-1;i>=0;i--){
+    const p=atmosphereParticles[i];
+    p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vr*dt;
+    if(!p.ambient)p.life-=dt;
+    if(p.ambient){
+      if(p.y<-45){p.y=h+35;p.x=Math.random()*w;}
+      if(p.x<-40)p.x=w+35;if(p.x>w+40)p.x=-35;
+    }else if(p.life<=0||p.y<-90||p.x<-100||p.x>w+100){
+      atmosphereParticles.splice(i,1);continue;
+    }
+    const fade=p.ambient?.72:Math.min(1,p.life/.55);
+    const sprite=getEmojiSprite(p.emoji,p.size);
+    const drawSize=p.size*1.45;
+    ctx.globalAlpha=fade;
+    ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+    ctx.drawImage(sprite,-drawSize/2,-drawSize/2,drawSize,drawSize);
+    ctx.setTransform(Math.min(window.devicePixelRatio||1,1.15),0,0,Math.min(window.devicePixelRatio||1,1.15),0,0);
+  }
+  ctx.globalAlpha=1;
+  atmosphereFrame=requestAnimationFrame(drawAtmosphere);
+}
+function startFloatingAtmosphere(){startAtmosphereLoop();}
+function stopFloatingAtmosphere(){
+  atmosphereRunning=false;
+  if(atmosphereFrame)cancelAnimationFrame(atmosphereFrame);
+  atmosphereFrame=0;atmosphereParticles=[];
+  if(atmosphereCtx){atmosphereCtx.setTransform(1,0,0,1,0,0);atmosphereCtx.clearRect(0,0,atmosphereCanvas.width,atmosphereCanvas.height);}
+}
+function triggerHaptic(){
+  try{if(typeof navigator!=='undefined'&&typeof navigator.vibrate==='function')navigator.vibrate([45,35,65]);}catch(e){}
+}
+function burstEffects(kind){
+  if(!kind)return;
+  startAtmosphereLoop();
+  if(!atmosphereCtx){fallbackEmojiBurst(kind,60);return;}
+  const mobile=innerWidth<700;
+  const amount=mobile?72:125;
+  triggerHaptic();
+  for(let i=0;i<amount;i++){
+    const angle=Math.random()*Math.PI*2,speed=35+Math.random()*135;
+    addAtmosphereParticle({x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+      vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-18,size:18+Math.random()*32,
+      emoji:kind==='🎉'?['💗','✨','🌸','🎉','⭐'][i%5]:[kind,'💖','💕','🌸','✨','🫶','💘'][i%7]});
+  }
+  // Hard ceiling prevents repeated taps from creating unbounded particle counts.
+  if(atmosphereParticles.length>260)atmosphereParticles=atmosphereParticles.slice(-260);
+}
+function heartExplosion(){
+  startAtmosphereLoop();
+  triggerHaptic();
+  if(!atmosphereCtx){fallbackEmojiBurst('💗',70);return;}
+  const mobile=innerWidth<700,count=mobile?95:155;
+  for(let i=0;i<count;i++){
+    const angle=Math.random()*Math.PI*2,speed=35+Math.random()*(mobile?110:150);
+    addAtmosphereParticle({
+      x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+      vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-20,
+      size:18+Math.random()*34,emoji:atmosphereEmojis[i%atmosphereEmojis.length]
+    });
+  }
+  if(atmosphereParticles.length>300)atmosphereParticles=atmosphereParticles.slice(-300);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){atmosphereRunning=false;if(atmosphereFrame)cancelAnimationFrame(atmosphereFrame);atmosphereFrame=0;}
+  else if(atmosphereParticles.length)startAtmosphereLoop();
+});
+function fallbackEmojiBurst(symbol,count){
+  const root=document.getElementById('recipientView')||document.body;
+  const layer=document.createElement('div');
+  layer.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden';
+  root.appendChild(layer);
+  const glyphs=[symbol,'💖','💕','🌸','✨','🫶','💘'];
+  for(let i=0;i<count;i++){
+    const node=document.createElement('span');
+    node.textContent=glyphs[i%glyphs.length];
+    node.style.cssText=`position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;font-size:${18+Math.random()*30}px;animation:fade ${1.8+Math.random()*2}s ease-out both`;
+    layer.appendChild(node);
+  }
+  setTimeout(()=>layer.remove(),4000);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    atmosphereRunning=false;if(atmosphereFrame)cancelAnimationFrame(atmosphereFrame);
+    atmosphereFrame=0;
+  }else if(atmosphereParticles.length){
+    startAtmosphereLoop();
+  }
+});
+async function showReaction(kind){
+  const result=$('reactionResult');
+  const actionCopy=occasionActions[(window.currentLetterConfig||{}).occasion]||occasionActions['Любимые слова'];const copy={smile:actionCopy.reply,talk:'Тогда пусть это будет началом тёплого разговора. Без спешки и без давления ☕',time:'Конечно. Не нужно отвечать сразу — твои чувства и время важны 🌷'};
+  result.textContent=copy[kind]||copy.smile;
+  result.classList.add('show');
+  if(kind==='smile'){heartExplosion();burstEffects('💗');}
+  else if(kind==='talk'){burstEffects('✨');}
+  else{burstEffects('🌸');}
+  const match=location.pathname.match(/^\/l\/([A-Za-z0-9_-]+)\/?$/);
+  if(match){
+    try{
+      const response=await fetch('/api/letters/'+encodeURIComponent(match[1])+'/reactions',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({reaction:kind,message:copy[kind]||copy.smile})
+      });
+      if(!response.ok) throw new Error('save failed');
+      const note=document.createElement('p');note.className='small';note.textContent='Твоя реакция сохранена 💌';result.appendChild(note);
+    }catch(e){
+      const note=document.createElement('p');note.className='small';note.textContent='Реакция показана на экране, но сервер пока недоступен.';result.appendChild(note);
+    }
+  }
+}
+
+
+async function submitRecipientReply(){
+  const field=$('recipientReply'),button=$('sendRecipientReply'),result=$('reactionResult');
+  const message=(field.value||'').trim();
+  if(!message){field.focus();showToast('Напиши пару слов перед отправкой 💌');return;}
+  const match=location.pathname.match(/^\/l\/([A-Za-z0-9_-]+)\/?$/);
+  if(!match){showToast('Сначала открой опубликованное письмо по ссылке 💗');return;}
+  button.disabled=true;button.textContent='Отправляем…';
+  try{
+    const response=await fetch('/api/letters/'+encodeURIComponent(match[1])+'/reactions',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({reaction:'message',message})
+    });
+    if(!response.ok)throw new Error('Не удалось сохранить сообщение');
+    result.textContent='Спасибо, что поделилась своими мыслями. Твоё сообщение отправлено 💗';
+    result.classList.add('show');
+    field.value='';$('replyCounter').textContent='0 / 500';
+    heartExplosion();burstEffects('💌');
+    button.textContent='Отправлено ✓';
+  }catch(e){
+    result.textContent='Не получилось отправить сообщение. Попробуй ещё раз чуть позже.';
+    result.classList.add('show');button.disabled=false;button.textContent='Отправить сообщение 💗';
+  }
+}
+
+function showToast(s){$('toast').style.display='block';$('toast').textContent=s}
+function encodeConfig(o){const bytes=new TextEncoder().encode(JSON.stringify(o));let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function decodeConfig(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return JSON.parse(new TextDecoder().decode(bytes))}
+async function publishDemo(){
+  const cfg=getConfig();
+  // Small photo/audio data URLs are stored with this letter. Keep uploads under the editor limits.
+  const button=document.querySelector('.footer-actions .primary');
+  const original=button ? button.textContent : '';
+  if(button){button.disabled=true;button.textContent='Публикуем…';}
+  try{
+    const response=await fetch('/api/letters',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(cfg)
+    });
+    const result=await response.json();
+    if(!response.ok) throw new Error(result.detail || 'Не удалось опубликовать письмо');
+    const url=location.origin+'/l/'+result.id;
+    showToast('Готово! Признание сохранено в базе данных. Ссылка будет работать на любом устройстве, пока сайт запущен и доступен в интернете.');
+    const box=document.createElement('div');
+    box.style.marginTop='10px';
+    box.innerHTML='<input id="shareUrl" readonly style="width:100%;padding:12px;border:2px solid #c7b9bf;border-radius:10px"/><button id="copyShare" class="primary" style="margin-top:10px">Копировать ссылку</button><p><a id="openPublished" target="_blank" rel="noopener">Открыть страницу получателя ↗</a></p><hr style="margin:14px 0;border:0;border-top:1px solid #ddd"/><strong>🔐 Твоя приватная страница ответов</strong><p class="small">Сохрани эту ссылку. Только по ней можно посмотреть реакции на письмо.</p><input id="authorUrl" readonly style="width:100%;padding:12px;border:2px solid #c7b9bf;border-radius:10px"/><button id="copyAuthor" class="primary" style="margin-top:10px">Копировать ссылку автора</button><p class="small">Пока сервер локальный, ссылки работают только на твоём устройстве. После публикации на хостинге они станут публичными.</p>';
+    $('toast').appendChild(box);
+    $('shareUrl').value=url;
+    $('openPublished').href=url;
+    const authorUrl=location.origin+result.author_url;
+    $('authorUrl').value=authorUrl;
+    $('copyAuthor').onclick=async()=>{
+      try{await navigator.clipboard.writeText(authorUrl);$('copyAuthor').textContent='Скопировано ✓'}
+      catch(e){$('authorUrl').select();document.execCommand('copy');$('copyAuthor').textContent='Скопировано ✓'}
+    };
+    $('copyShare').onclick=async()=>{
+      try{await navigator.clipboard.writeText(url);$('copyShare').textContent='Скопировано ✓'}
+      catch(e){$('shareUrl').select();document.execCommand('copy');$('copyShare').textContent='Скопировано ✓'}
+    };
+  }catch(error){
+    showToast('Ошибка публикации: '+error.message+'. Проверь, что сервер запущен по инструкции README.');
+  }finally{
+    if(button){button.disabled=false;button.textContent=original;}
+  }
+}
+async function openRecipientFromServer(id){
+  try{
+    const response=await fetch('/api/letters/'+encodeURIComponent(id));
+    if(!response.ok) throw new Error('Письмо не найдено');
+    const cfg=await response.json();
+    openRecipient(cfg);
+  }catch(error){
+    document.querySelector('.top').style.display='none';
+    document.querySelector('.layout').style.display='none';
+    $('recipientView').classList.add('active');
+    $('recipientIntro').textContent='Письмо не найдено';
+    $('recipientHint').textContent='Возможно, ссылка неполная или письмо удалено.';
+    $('bigEnvelope').style.display='none';
+    $('recipientFooter').textContent='Проверь ссылку и попробуй ещё раз.';
+  }
+}
+function bindEnvelopeGloss(){
+ const envelope=$('bigEnvelope');
+ if(!envelope||envelope.dataset.glossBound)return;
+ envelope.dataset.glossBound='1';
+ envelope.addEventListener('pointermove',event=>{
+  const rect=envelope.getBoundingClientRect();
+  const x=Math.max(0,Math.min(100,((event.clientX-rect.left)/rect.width)*100));
+  const y=Math.max(0,Math.min(100,((event.clientY-rect.top)/rect.height)*100));
+  envelope.style.setProperty('--gloss-x',x+'%');
+  envelope.style.setProperty('--gloss-y',y+'%');
+ },{passive:true});
+ envelope.addEventListener('pointerleave',()=>{
+  envelope.style.setProperty('--gloss-x','50%');
+  envelope.style.setProperty('--gloss-y','38%');
+ },{passive:true});
+}
+function renderInkLines(message){
+ const target=$('recipientMessage');
+ target.innerHTML='';
+ const maxChars=43;
+ const paragraphs=String(message||'').split(/\r?\n/);
+ let index=0;
+ paragraphs.forEach((paragraph)=>{
+   const words=paragraph.split(/\s+/).filter(Boolean);
+   if(!words.length){const blank=document.createElement('span');blank.className='ink-line';blank.textContent='\u00a0';blank.style.setProperty('--line-delay',(2.92+index*.13)+'s');target.appendChild(blank);index++;return;}
+   let line='';
+   const flush=()=>{
+     const span=document.createElement('span');span.className='ink-line';span.textContent=line;
+     span.style.setProperty('--line-delay',(2.92+index*.13)+'s');target.appendChild(span);line='';index++;
+   };
+   words.forEach(word=>{
+     if(line&&(line+' '+word).length>maxChars)flush();
+     line+=(line?' ':'')+word;
+   });
+   if(line)flush();
+ });
+}
+function openRecipient(cfg){
+ window.currentLetterConfig=cfg;
+ document.querySelector('.top').style.display='none';
+ document.querySelector('.layout').style.display='none';
+ const view=$('recipientView');
+ view.classList.add('active');
+ bindEnvelopeGloss();
+ view.classList.remove('open','intro-name','intro-envelope');
+ document.body.style.background='#160b14';
+ const name=cfg.recipient||'Елдана';
+ $('recipientIntro').textContent=cfg.intro||'Это для тебя';
+ $('recipientNameIntro').textContent=name;
+ $('recipientHint').textContent=cfg.envelopeHint||'нажми на конверт';
+ $('recipientGreeting').textContent=(cfg.greeting||'Это тебе, {name}').replaceAll('{name}',name);
+ $('recipientTitle').textContent=cfg.title||'';
+ renderInkLines(cfg.message||'');
+ if(cfg.photoData){$('recipientPhoto').src=cfg.photoData;$('recipientPhoto').style.display='block'}else{$('recipientPhoto').style.display='none'}
+ playLetterMusic(cfg);
+ $('recipientSignature').textContent=[cfg.signature,cfg.sender].filter(Boolean).join(' · ');
+ $('recipientEnding').textContent=cfg.ending||'';
+ $('recipientEffect').textContent=cfg.effect?Array(5).fill(cfg.effect).join(' '):'';
+ $('recipientTop').textContent=(cfg.occasion||'Личное письмо')+' · для '+name;
+ $('recipientFooter').textContent='С теплом ♡';
+ const palette={rose:['#51203b','#160b14','#ff8eb2'],ocean:['#173c59','#071827','#8bc9f4'],gold:['#56301f','#21120e','#f4c36a'],night:['#242d61','#090d25','#aebaff']};
+ const c=palette[cfg.theme]||palette.rose;
+ view.style.background='radial-gradient(ellipse at 50% 30%,'+c[0]+','+c[1]+' 68%)';
+ $('recipientIntro').style.color=c[2];
+ // Intro choreography: title first, recipient name second, envelope last.
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduced){view.classList.add('intro-name','intro-envelope');}
+ else{
+   window.setTimeout(()=>view.classList.add('intro-name'),850);
+   window.setTimeout(()=>view.classList.add('intro-envelope'),1850);
+ }
+ $('bigEnvelope').onclick=()=>{
+   if(view.classList.contains('open'))return;
+   view.classList.add('open');
+   $('recipientHint').style.display='none';
+   burstEffects(cfg.effect||'❤️');
+   heartExplosion();
+   startFloatingAtmosphere();
+   if(cfg.musicData||cfg.ambientEnabled)$('musicToggle').style.display='inline-block';
+   if(cfg.musicData){$('recipientAudio').play().then(()=>{$('musicToggle').textContent='♫ Выключить музыку'}).catch(()=>{})}
+   else if(cfg.ambientEnabled){startAmbient();recipientMusicOn=true;$('musicToggle').textContent='♫ Выключить мелодию'}
+   const actionCopy=occasionActions[cfg.occasion]||occasionActions['Любимые слова'];
+   $('reactionTitle').textContent=actionCopy.prompt;
+   if(cfg.yesText){
+     $('answerButton').textContent=cfg.yesText;
+     $('answerButton').onclick=()=>{
+       $('reactionPanel').classList.add('show');
+       showReaction('smile');
+       $('answerButton').textContent=actionCopy.button;
+       $('reactionPanel').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});
+     };
+   }
+   // Controls appear only after the paper has had time to unfold.
+   window.setTimeout(()=>{
+     $('answerButton').style.display='inline-block';
+     $('reactionPanel').classList.add('show');
+     $('shareRecipient').style.display=cfg.shareButton?'inline-block':'none';
+     $('restartRecipient').style.display=cfg.reopen?'inline-block':'none';
+   },reduced?0:Math.min(6200,3900+String(cfg.message||'').split(/\s+/).length*45));
+ };
+ $('bigEnvelope').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('bigEnvelope').click()}};
+ $('restartRecipient').onclick=()=>{
+   stopFloatingAtmosphere();
+   view.classList.remove('open','intro-name','intro-envelope');
+   $('recipientMessage').querySelectorAll('.ink-line').forEach(el=>{el.style.animation='none';void el.offsetWidth;el.style.animation='';});
+   $('recipientHint').style.display='block';
+   $('answerButton').style.display='none';
+   $('shareRecipient').style.display='none';
+   $('restartRecipient').style.display='none';
+   $('recipientAnswer').style.display='none';
+   $('reactionPanel').classList.remove('show');
+   $('reactionResult').classList.remove('show');
+   window.setTimeout(()=>view.classList.add('intro-name'),850);
+   window.setTimeout(()=>view.classList.add('intro-envelope'),1850);
+ };
+ $('shareRecipient').onclick=async()=>{try{await navigator.share({title:'Личное письмо',url:location.href})}catch(e){try{await navigator.clipboard.writeText(location.href);$('shareRecipient').textContent='Ссылка скопирована ✓'}catch(_){}}};
+}
+
+$('sendRecipientReply').addEventListener('click',submitRecipientReply);
+$('recipientReply').addEventListener('input',()=>{$('replyCounter').textContent=$('recipientReply').value.length+' / 500';});
+document.querySelectorAll('[data-reaction]').forEach(button=>button.addEventListener('click',()=>showReaction(button.dataset.reaction)));
+async function openAuthorDashboard(id,token){
+  document.querySelector('.top').style.display='none';
+  document.querySelector('.layout').style.display='none';
+  $('recipientView').classList.remove('active');
+  let panel=document.getElementById('authorDashboard');
+  if(!panel){
+    panel=document.createElement('main');panel.id='authorDashboard';
+    panel.style.cssText='max-width:760px;margin:36px auto;padding:24px;background:#fff8f3;color:#382333;border-radius:22px;box-shadow:0 18px 60px #0005;font-family:system-ui,sans-serif';
+    document.body.appendChild(panel);
+  }
+  panel.style.display='block';
+  panel.innerHTML='<h1>💌 Ответы на твоё письмо</h1><p>Здесь появятся реакции, которые Елдана отправит с письма.</p><button id="refreshReactions" style="padding:12px 16px;border:0;border-radius:12px;background:#9e426d;color:white;font-weight:700;cursor:pointer">Обновить ответы ↻</button><div id="reactionList" style="margin-top:20px">Загружаем…</div><p style="font-size:12px;opacity:.7">Не передавай эту приватную ссылку другим людям.</p>';
+  async function refresh(){
+    const list=document.getElementById('reactionList');list.textContent='Загружаем…';
+    try{
+      const r=await fetch('/api/letters/'+encodeURIComponent(id)+'/reactions?token='+encodeURIComponent(token));
+      const data=await r.json();
+      if(!r.ok) throw new Error(data.detail||'Не удалось загрузить ответы');
+      if(!data.reactions.length){list.innerHTML='<p>Пока нет ответов. Когда получательница выберет реакцию, она появится здесь. 💗</p>';return;}
+      const labels={smile:'💗 Мне приятно',talk:'☕ Давай поговорим',time:'🌷 Мне нужно время',message:'💌 Личное сообщение'};
+      list.innerHTML=data.reactions.map(x=>'<article style="padding:16px;margin:12px 0;background:#fff;border:1px solid #ead7df;border-radius:14px"><strong>'+labels[x.reaction]+'</strong><p>'+escapeHtml(x.message||'')+'</p><small>'+escapeHtml(x.created_at||'')+'</small></article>').join('');
+    }catch(e){list.textContent='Ошибка: '+e.message;}
+  }
+  document.getElementById('refreshReactions').onclick=refresh;
+  await refresh();
+}
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function routeFromHash(){
+  const authorMatch=location.pathname.match(/^\/author\/([A-Za-z0-9_-]+)\/?$/);
+  if(authorMatch){openAuthorDashboard(authorMatch[1],new URLSearchParams(location.search).get('token')||'');return;}
+  const pathMatch=location.pathname.match(/^\/l\/([A-Za-z0-9_-]+)\/?$/);
+  if(pathMatch){openRecipientFromServer(pathMatch[1]);return;}
+  const m=location.hash.match(/^#\/l\/(.+)$/);
+  if(m){try{openRecipient(decodeConfig(m[1]))}catch(e){showToast('Не удалось прочитать ссылку. Проверь, что она скопирована полностью.')}}
+}
+function downloadConfig(){const blob=new Blob([JSON.stringify(getConfig(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='letter-settings.json';a.click();URL.revokeObjectURL(a.href)}function resetForm(){if(confirm('Сбросить редактор?')){localStorage.removeItem('letterDraft');location.reload()}}applyOccasion(selectedOccasion);render();routeFromHash();window.addEventListener("hashchange",routeFromHash);
+</script></body></html>
